@@ -3,6 +3,7 @@ package com.meu.tiptime
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,7 +51,9 @@ class MainActivity : AppCompatActivity() {
     fun Screen(){
         var amountInput by remember { mutableStateOf("") }
         val amount = amountInput.toDoubleOrNull() ?: 0.0
-        val tip = calculateTip(amount)
+        var tipInput by remember { mutableStateOf("") }
+        val tipPercent = tipInput.toDoubleOrNull() ?: 0.0
+        val tip = calculateTip(amount, tipPercent)
 
         Column(
             Modifier.padding(32.dp), Arrangement.spacedBy(8.dp)
@@ -57,9 +61,25 @@ class MainActivity : AppCompatActivity() {
             Text(text = stringResource(R.string.calculate_tip),
             fontSize = 24.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally))
+
+            //Adiciona espaço
             Spacer(modifier = Modifier.height(16.dp))
-            editNumberField(amountInput, onValueChange = {amountInput = it})
+
+            //Adicionando EditText.
+            editNumberField(
+                label = R.string.bill_amount,
+                value = amountInput,
+                onValueChange = {amountInput = it},
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next))
+            editNumberField(
+                label = R.string.how_was_the_service,
+                value = tipInput,
+                onValueChange = {tipInput = it},
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done))
+
+            //Adiciona espaço
             Spacer(Modifier.height(24.dp))
+
             Text(
                 text = stringResource(R.string.tip_amount, tip),
                 modifier = Modifier.align(Alignment.End),
@@ -72,16 +92,21 @@ class MainActivity : AppCompatActivity() {
 
     @Composable
     private fun editNumberField(
+        @StringRes label: Int,
         value: String,
-        onValueChange: (String) -> Unit
+        onValueChange: (String) -> Unit,
+        keyboardOptions: KeyboardOptions,
+        modifier: Modifier = Modifier
     ) {
         TextField(
             value = value,
             onValueChange = onValueChange,
-            label = { Text(text = stringResource(id = R.string.bill_amount), Modifier.fillMaxWidth())}   ,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            label = { Text(text = stringResource(id = label), Modifier.fillMaxWidth())}   ,
+            keyboardOptions = keyboardOptions,
             singleLine = true
         )
+
+
     }
 
     private fun calculateTip(
